@@ -7,9 +7,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.luanasilva.aularetrofitapi.api.EnderecoAPI
+import com.luanasilva.aularetrofitapi.api.PostagemAPI
 import com.luanasilva.aularetrofitapi.api.RetrofitHelper
 import com.luanasilva.aularetrofitapi.databinding.ActivityMainBinding
 import com.luanasilva.aularetrofitapi.model.Endereco
+import com.luanasilva.aularetrofitapi.model.Postagem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,8 +25,11 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    private val retrofit by lazy {
-        RetrofitHelper.retrofit
+    private val retrofitViaCep by lazy {
+        RetrofitHelper.apiViaCep
+    }
+    private val retrofitJsonPlaceHolder by lazy {
+        RetrofitHelper.apiJsonPlaceHolder
     }
 
 
@@ -52,14 +57,42 @@ class MainActivity : AppCompatActivity() {
 
 
         binding.btnIniciar.setOnClickListener {
-            Log.i("info_endereco", "botão clicado")
+
             CoroutineScope(Dispatchers.IO).launch {
 
-                recuperarEndereco()
+                //recuperarEndereco()
+                Log.i("info_json", "botão corotina iniciada")
+                recuperarPostagens()
 
             }
         }
 
+    }
+
+    private suspend fun recuperarPostagens() {
+
+        var retorno:Response<List<Postagem>>? =null
+
+        try {
+            val postagemAPI = retrofitJsonPlaceHolder.create(PostagemAPI::class.java)
+            retorno = postagemAPI.recuperarPostagens()
+            Log.i("info_jason", "Postagens recuperadas")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.i("info_json", "erro ao recuperar")
+        }
+
+        if (retorno != null) {
+            if (retorno.isSuccessful) {
+                val listaPostagens = retorno.body()
+                listaPostagens?.forEach { postagem ->
+                    val id = postagem.id
+                    val title = postagem.title
+                    Log.i("info_json", "o ID é $id e título é $title")
+                }
+
+            }
+        }
     }
 
     private suspend fun recuperarEndereco() {
@@ -68,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         val cepDigitadoUsuario = "94130270"//binding.editViewUsuario
 
         try {
-            val enderecoAPI = retrofit.create(EnderecoAPI::class.java)
+            val enderecoAPI = retrofitViaCep.create(EnderecoAPI::class.java)
             retorno = enderecoAPI.recuperarEndereco(cepDigitadoUsuario)
         } catch (e: Exception) {
             e.printStackTrace()
