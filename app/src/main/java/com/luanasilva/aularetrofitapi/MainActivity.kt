@@ -9,7 +9,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.luanasilva.aularetrofitapi.api.PostagemAPI
 import com.luanasilva.aularetrofitapi.api.RetrofitHelper
 import com.luanasilva.aularetrofitapi.databinding.ActivityMainBinding
-import com.luanasilva.aularetrofitapi.model.Postagem
+import com.luanasilva.aularetrofitapi.model.Comentario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -66,14 +66,54 @@ class MainActivity : AppCompatActivity() {
                 //recuperarEndereco()
                 Log.i(INFO_JSON, "botão corotina iniciada")
                 //recuperarPostagens()
-                recuperarPostagemUnica()
+                //recuperarPostagemUnica()
+                recuperarComentariosParaPostagens()
 
             }
         }
 
     }
 
-    private suspend fun recuperarPostagemUnica() {
+
+
+    private suspend fun recuperarComentariosParaPostagens() {
+
+        var retorno:Response<List<Comentario>>? =null
+
+        try {
+            val postagemAPI = retrofitJsonPlaceHolder.create(PostagemAPI::class.java)
+            retorno = postagemAPI.recuperarComentariosParaPostagem(1)
+            Log.i("info_jason", "Postagens recuperadas")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.i("info_json", "erro ao recuperar")
+        }
+
+        if (retorno != null) {
+            if (retorno.isSuccessful) {
+                val listaComentarios = retorno.body()
+                var exibirTexto = ""
+
+                listaComentarios?.forEach { comentario ->
+                    val id = comentario.id
+                    val email = comentario.email
+                    val texto = " $id - $email \n"
+                    exibirTexto += texto
+
+                }
+
+                withContext(Dispatchers.Main){
+                    binding.textView.text = exibirTexto
+                }
+
+            }
+        }
+    }
+
+
+
+
+    /*private suspend fun recuperarPostagemUnica() {
 
         var retorno:Response<Postagem>? =null
 
@@ -100,21 +140,7 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }*/
 
 
     /*private suspend fun recuperarPostagens() {
