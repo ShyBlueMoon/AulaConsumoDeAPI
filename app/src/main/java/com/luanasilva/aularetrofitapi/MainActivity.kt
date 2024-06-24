@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
 
         try {
             val postagemAPI = retrofitJsonPlaceHolder.create(PostagemAPI::class.java)
-            retorno = postagemAPI.recuperarComentariosParaPostagem(1)
+            retorno = postagemAPI.recuperarComentariosParaPostagemQuery(1)
             Log.i("info_jason", "Postagens recuperadas")
         } catch (e: Exception) {
             e.printStackTrace()
